@@ -12,52 +12,15 @@ import CheckoutPage from './pages/checkout/checkout.component';
 
 import Header from './components/header/header.component';
 
-import { auth, createUserProfileDocument/*, addCollectionAndDocuments*/ } from './firebase/firebase.utils';
-
-import { setCurrentUser } from './redux/user/user.actions';
 import { selectCurrentUser } from './redux/user/user.selectors';
-//import { selectCollectionsForPreview } from './redux/shop/shop.selectors';
+import { checkUserSession } from './redux/user/user.actions';
 
 class App extends React.Component{
-	/*constructor(){
-		super();
-
-		this.state = {
-			currentUser: null
-		}
-	}*/ // needed fefore Redux
-
 	unsubscribeFromAuth = null;
 
 	componentDidMount(){
-		const {setCurrentUser/*, collectionsArray*/} = this.props;
-
-		this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
-			if(userAuth){
-				const userRef = await createUserProfileDocument(userAuth);
-
-				userRef.onSnapshot(snapShot => {
-					setCurrentUser({
-						id: snapShot.id,
-						...snapShot.data()
-					})
-					/*this.setState( // before Redux
-						{
-							currentUser: {
-								id: snapShot.id,
-								...snapShot.data()
-							}
-					});*/
-				});
-
-			}
-			
-			//this.setState({currentUser: userAuth});
-			setCurrentUser(userAuth);
-			/*addCollectionAndDocuments(
-				'collections',
-				collectionsArray.map(({title, items}) => ({title, items})))*/
-		})
+		const {checkUserSession} = this.props;
+		checkUserSession();
 	}
 
 	componentWillUnmount(){
@@ -67,7 +30,6 @@ class App extends React.Component{
 	render(){
 		return (
 			<div>
-
 				<Header />
 				<Switch>
 					<Route exact path='/' component={HomePage}></Route>
@@ -78,24 +40,20 @@ class App extends React.Component{
 							<Redirect to='/' />
 						) : (
 							<SignInAndSignUpPage />
-						)}/*component={SignInAndSignUpPage}*/></Route>
+						)}>
+					</Route>
 				</Switch>
 			</div>
 		);
 	}
 }
 
-//const mapStateToProps = ({ user }) => ({
-	//currentUser: user.currentUser
 const mapStateToProps = createStructuredSelector({
 	currentUser: selectCurrentUser,
-	//collectionsArray: selectCollectionsForPreview
 });
 
 const mapDispatchToProps = dispatch => ({
-	setCurrentUser: user => dispatch(setCurrentUser(user))
-});
+	checkUserSession: () => dispatch(checkUserSession())
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(App);
-
-//<Header currentUser={this.state.currentUser} /> //line 61 before Redux
